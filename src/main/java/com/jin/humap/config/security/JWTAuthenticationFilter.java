@@ -33,9 +33,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     public static List<String> notFilterUrls = new LinkedList<>();
 
     static {
-        notFilterUrls.add("/demo/free");
-        notFilterUrls.add("/demo/login"); //可使用通配符 /demo/authorize/**
-        notFilterUrls.add("/demo/captcha");
+        notFilterUrls.add("/free/**");
+        notFilterUrls.add("/index"); //可使用通配符 /demo/authorize/**
     }
 
     // 不需要验证的url
@@ -51,9 +50,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         if (JWTUtil.verifyToken(request)) {
-            // 验证通过
-//            String username = JWTUtil.getUsernameFromRequest(request);
-            //todo 检查用户的有效性
             chain.doFilter(request, response);
         } else {
             // 验证失败

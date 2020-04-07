@@ -3,7 +3,7 @@ package com.jin.humap.config.security;
 
 import com.jin.humap.exception.ExceptionCode;
 import com.jin.humap.exception.SystemException;
-import com.jin.humap.until.CacheUtil;
+import com.jin.humap.service.AuthorizationService;
 import com.jin.humap.until.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,26 +28,18 @@ public class AuthorizationAspect {
 
     private final AuthorizationService authorizationService;
 
-    private final CacheUtil cacheUtil;
-
-    private static final String PRE = "AUTH";
-
     @Before("@annotation(com.jin.humap.config.security.Authorize)")
     public void checkPermission(JoinPoint joinPoint) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         // 查询用户拥有权限
         Long accountId = JWTUtil.getUserIdFromRequest(request);
-        Set<String> authorization = cacheUtil.getAllSet(PRE + accountId);
-        if(authorization==null){
-            authorization = authorizationService.findByAccountId(accountId);
-            cacheUtil.save(PRE + accountId, authorization);
-        }
+        Set<String> authorization = authorizationService.findByAccountId(accountId);
         Authorize authorize = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Authorize.class);
         String[] needAuthorization = authorize.value();
-        if (needAuthorization.length == 0)  return;
-        if (authorization!=null && !authorization.isEmpty()) {
-            if (!authorization.containsAll(Arrays.asList(needAuthorization))){
-            // 无操作权限
+        if (needAuthorization.length == 0) return;
+        if (authorization != null && !authorization.isEmpty()) {
+            if (!authorization.containsAll(Arrays.asList(needAuthorization))) {
+                // 无操作权限
                 throw new SystemException(ExceptionCode.NO_PERMISSION);
             }
         } else {

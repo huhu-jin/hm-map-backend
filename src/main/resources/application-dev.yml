@@ -56,5 +56,9 @@ mybatis:
     map-underscore-to-camel-case: true
     cache-enabled: true
 
+mini_program:
+  appId: wx18ad25580f81bf35
+  appSecret: e46ce7056fc3602a901f32366d3
+
 logback:
   file: "~/logs"
